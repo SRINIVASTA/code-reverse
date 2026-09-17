@@ -33,7 +33,7 @@ PRESET_REPOS = ["Next.js", "Openclaw", "React", "Supabase", "Linux"]
 PRESET_SITES = ["YouTube", "Pinterest", "Xbox", "Apple", "Discord"]
 
 # ==============================================================================
-# 2. LLM ENGINE & DATA EXTRACTION UTILITIES (ARRAY PARSING INDEX FIXED)
+# 2. LLM ENGINE & DATA EXTRACTION UTILITIES (FIXED API DOMAIN ROUTING)
 # ==============================================================================
 def call_gemini_ai(scanned_context):
     """
@@ -44,7 +44,11 @@ def call_gemini_ai(scanned_context):
     if not api_key:
         return "⚠️ Please enter your free Gemini API Key in the sidebar to generate custom live prompts!"
         
-    url = f"https://googleapis.com{api_key}"
+    # FIX: Hardcoded static endpoint with ZERO formatting variables inside the main string
+    url = "https://googleapis.com"
+    
+    # Key parameter passed safely inside an independent query array config
+    query_params = {"key": api_key}
     headers = {"Content-Type": "application/json"}
     
     payload = {
@@ -62,21 +66,21 @@ def call_gemini_ai(scanned_context):
         }]
     }
     try:
-        res = requests.post(url, json=payload, headers=headers, timeout=15)
+        # Route query parameters explicitly using requests framework params parameter
+        res = requests.post(url, json=payload, params=query_params, headers=headers, timeout=15)
         
-        # Check if the connection itself failed
         if res.status_code != 200:
-            return f"⚠️ Google Gateway rejected request (Status Code {res.status_code}). Verify your API Key."
+            return f"⚠️ Google Gateway rejected request (Status Code {res.status_code}). Please verify your API Key is correct."
             
         response_json = res.json()
         
-        # FIXED: Navigating candidates and parts as lists [0] instead of standard strings
-        if "candidates" in response_json and isinstance(response_json["candidates"], list) and len(response_json["candidates"]) > 0:
-            first_candidate = response_json["candidates"][0]
-            if "content" in first_candidate and "parts" in first_candidate["content"]:
-                parts_list = first_candidate["content"]["parts"]
-                if isinstance(parts_list, list) and len(parts_list) > 0:
-                    return parts_list[0].get("text", "No generated text string layout detected.")
+        # Pull text from candidate elements securely matching the list properties structure
+        if "candidates" in response_json and response_json["candidates"]:
+            candidates_list = response_json["candidates"]
+            if len(candidates_list) > 0 and "content" in candidates_list[0]:
+                content_node = candidates_list[0]["content"]
+                if "parts" in content_node and len(content_node["parts"]) > 0:
+                    return content_node["parts"][0].get("text", "No generated text layout detected.")
                     
         return f"Unexpected API Response Structure: {str(response_json)}"
     except ValueError:
@@ -99,9 +103,8 @@ def extract_live_github_data(url):
             return None, f"Server rejected repository fetch loop with status code: {res.status_code}"
         
         soup = BeautifulSoup(res.text, "html.parser")
-        # Strip all headers, layout texts, readme clips, and description tags safely
         page_text = " ".join([t.get_text().strip() for t in soup.find_all(["h1", "h2", "p", "li"]) if t.get_text()])
-        return page_text[:4000], None # Safely pack the context window size
+        return page_text[:4000], None 
     except Exception as e:
         return None, str(e)
 
