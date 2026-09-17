@@ -3,6 +3,12 @@ import requests
 from bs4 import BeautifulSoup
 import urllib.parse
 
+# Import the official SDK library that worked in your Colab notebook
+try:
+    from google import genai
+except ImportError:
+    st.error("⚠️ The 'google-genai' library is missing. Please make sure your requirements.txt contains 'google-genai'.")
+
 # ==============================================================================
 # 1. VISUAL DNA: EXACT FRONTEND REPLICATION (CLEAN INTERFACE)
 # ==============================================================================
@@ -33,56 +39,40 @@ PRESET_REPOS = ["Next.js", "Openclaw", "React", "Supabase", "Linux"]
 PRESET_SITES = ["YouTube", "Pinterest", "Xbox", "Apple", "Discord"]
 
 # ==============================================================================
-# 2. LLM ENGINE & DATA EXTRACTION UTILITIES (FIXED EXPLICIT CONCATENATION)
+# 2. LLM ENGINE USING OFFICIAL SDK (REPLACED RAW REQUESTS TO PREVENT URL MIXUPS)
 # ==============================================================================
 def call_gemini_ai(scanned_context):
     """
-    Calls Google's Gemini API using your free key to look over the scraped code text
-    and output a conversational vibe-coding prompt block.
+    Calls Google's official GenAI SDK library directly, mirroring your successful
+    Colab connection. This protects against URL parameter concatenation errors.
     """
     api_key = st.session_state.get("api_key_input", "").strip()
     if not api_key:
         return "⚠️ Please enter your free Gemini API Key in the sidebar to generate custom live prompts!"
         
-    # FIXED: Combined the API key parameters using strict string concatenation to bypass 404 router issues
-    url = f"https://googleapis.com{api_key}"
-    headers = {"Content-Type": "application/json"}
-    
-    payload = {
-        "contents": [{
-            "parts": [{
-                "text": (
-                    "You are the backend engine of GitReverse. Take this raw scraped website text data "
-                    "and reverse-engineer it into a single, conversational user prompt. The prompt must "
-                    "be written in natural language, describing exactly how to build this specific project "
-                    "from scratch. Do not write folder diagrams or markdown structures. Write the exact "
-                    "prompt that a developer would copy and paste into Cursor or Claude Code to build it. "
-                    f"Raw Scraped Data: {scanned_context}"
-                )
-            }]
-        }]
-    }
     try:
-        res = requests.post(url, json=payload, headers=headers, timeout=15)
+        # Initialize the client with your key, just like your Colab Step 3
+        client = genai.Client(api_key=api_key)
         
-        if res.status_code != 200:
-            return f"⚠️ Google Gateway rejected request (Status Code {res.status_code}). Server Message: {res.text}"
-            
-        response_json = res.json()
+        prompt_instruction = (
+            "You are the backend engine of GitReverse. Take this raw scraped website text data "
+            "and reverse-engineer it into a single, conversational user prompt. The prompt must "
+            "be written in natural language, describing exactly how to build this specific project "
+            "from scratch. Do not write folder diagrams or markdown structures. Write the exact "
+            "prompt that a developer would copy and paste into Cursor or Claude Code to build it. "
+            f"Raw Scraped Data: {scanned_context}"
+        )
         
-        # Pull text components cleanly by drilling into candidate lists natively
-        if "candidates" in response_json and response_json["candidates"]:
-            candidates = response_json["candidates"]
-            if len(candidates) > 0 and "content" in candidates[0]:
-                content = candidates[0]["content"]
-                if "parts" in content and len(content["parts"]) > 0:
-                    return content["parts"][0].get("text", "No generated text found.")
-                    
-        return f"Unexpected API Response Structure: {str(response_json)}"
-    except ValueError:
-        return "⚠️ Failed to parse response as JSON. The API Key might be invalid or restricted."
+        # Run content generation with the modern gemini-2.5-flash model from your Colab test
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt_instruction
+        )
+        
+        return response.text.strip()
+        
     except Exception as e:
-        return f"API Processing Error: {str(e)}"
+        return f"❌ API Key Processing Error: {str(e)}"
 
 def extract_live_github_data(url):
     """
