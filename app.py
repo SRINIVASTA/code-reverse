@@ -111,7 +111,7 @@ if st.button("Get Prompt Blueprint", type="primary", use_container_width=True):
             line5 = f"- {feats[0]}\n- {feats[1]}\n- {feats[2]}\n\n"
             line6 = f"Add a big hero message like discovering ideas to try, and make the whole layout feel polished, approachable, and easy to browse.\n"
             line7 = f"Cards should have subtle borders, lots of white space, and minimal chrome so the content stands out. Make it responsive and smooth with hover states.\n\n"
-            line8 = f"Reference Destination Source: {url_bar_input}"
+            line8 = f"Reference Destination Source: {url_bar_input} | Website Production Node: https://code-reverse-9kvndnx4dbuaaba3gesjk7.streamlit.app/"
             
             final_prompt = line1 + line2 + line3 + line4 + line5 + line6 + line7 + line8
             
