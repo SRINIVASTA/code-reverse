@@ -28,7 +28,7 @@ st.markdown("""
     .footer-container { text-align: center; font-size: 13px; color: #656d76; margin-top: 80px; padding-top: 20px; border-top: 1px solid #d0d7de; }
     .footer-container a { color: #24292f; text-decoration: none; font-weight: 500; }
     </style>
-""", unsafe_allow_html=True) # <-- TYPO FIXED HERE
+""", unsafe_allow_html=True) # Fixed
 
 # Predefined fallback options for the layout badges
 PRESET_REPOS = ["Next.js", "Openclaw", "React", "Supabase", "Linux"]
@@ -57,7 +57,8 @@ def call_gemini_ai(scanned_context):
     }
     try:
         res = requests.post(url, json=payload, headers=headers, timeout=10)
-        return res.json()["candidates"]["content"]["parts"][0]["text"]
+        # Safely parse Gemini API content blocks response JSON
+        return res.json()["candidates"][0]["content"]["parts"][0]["text"]
     except Exception as e:
         return f"API Processing Error: {str(e)}"
 
@@ -101,10 +102,11 @@ st.markdown("""
             <a href="#">Sign in</a>
         </div>
     </div>
-""", unsafe_allow_html=True) # <-- TYPO FIXED HERE
+""", unsafe_allow_html=True) # Fixed
 
-st.markdown('<div class="main-tagline">Reverse into a prompt</div>', unsafe_allowed_html=False)
-st.markdown('<div class="main-sub">Reverse engineer any codebase or website into a prompt.</div>', unsafe_allowed_html=False)
+# Completely fixed lines below: Clean markdown texts with HTML rendering enabled!
+st.markdown('<div class="main-tagline">Reverse into a prompt</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-sub">Reverse engineer any codebase or website into a prompt.</div>', unsafe_allow_html=True)
 
 if "prompt_output" not in st.session_state:
     st.session_state.prompt_output = None
@@ -156,4 +158,4 @@ st.markdown("""
     Also works: replace hub with reverse in any GitHub URL.<br><br>
     Made by <a href="#">Filiksyos</a> Replica Blueprint
 </div>
-""", unsafe_allow_html=True) # <-- TYPO FIXED HERE
+""", unsafe_allow_html=True) # Fixed
