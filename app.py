@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import urllib.parse
 
 # ==============================================================================
-# 1. VISUAL DNA: EXACT GITREVERSE FRONTEND REPLICATION
+# 1. VISUAL DNA: EXACT FRONTEND REPLICATION
 # ==============================================================================
 st.set_page_config(page_title="GitReverse - Reverse into a prompt", page_icon="🔄", layout="centered")
 
@@ -35,7 +35,7 @@ PRESET_REPOS = ["Next.js", "Openclaw", "React", "Supabase", "Linux"]
 PRESET_SITES = ["YouTube", "Pinterest", "Xbox", "Apple", "Discord"]
 
 # ==============================================================================
-# 2. REAL LLM & DATA EXTRACTION ENGINES (CORRECTED & BULLETPROOF)
+# 2. LLM ENGINE & DATA EXTRACTION UTILITIES
 # ==============================================================================
 def call_gemini_ai(scanned_context):
     """
@@ -66,12 +66,13 @@ def call_gemini_ai(scanned_context):
         res = requests.post(url, json=payload, headers=headers, timeout=12)
         response_json = res.json()
         
-        # Safe structural fallback processing for Gemini API JSON trees
+        # Safely extract generated text chunks out of the nested Gemini JSON architecture
         if "candidates" in response_json and response_json["candidates"]:
             candidate = response_json["candidates"][0]
             if "content" in candidate and "parts" in candidate["content"]:
-                return candidate["content"]["parts"][0]["text"]
-                
+                if len(candidate["content"]["parts"]) > 0:
+                    return candidate["content"]["parts"][0].get("text", "No text found in API response parts.")
+                    
         return f"Unexpected API Response Structure: {str(response_json)}"
     except Exception as e:
         return f"API Processing Error: {str(e)}"
@@ -136,7 +137,6 @@ url_bar_input = st.text_input("Input Target", placeholder=placeholder, label_vis
 if st.button("Get Prompt", type="primary", use_container_width=True):
     if url_bar_input.strip():
         with st.spinner("Analyzing repository deployment configurations and invoking AI compiler..."):
-            # FIXED: Removed the accidental duplicate assignment typo causing the NoneType crash
             context_data, error = extract_live_github_data(url_bar_input)
             if error:
                 st.error(f"Scraping Error: {error}")
@@ -148,7 +148,9 @@ if st.button("Get Prompt", type="primary", use_container_width=True):
 # Quick-Click Presets Selection Badges
 st.markdown("<br>", unsafe_allow_html=True)
 presets = PRESET_REPOS if mode == "Codebase" else PRESET_SITES
-st.markdown(f'<div class="preset-label">Try example {"repos" if mode == "Codebase" else "websites"}:</div>', unsafe_allowed_html=True)
+
+# FIXED: Replaced unsafe_allowed_html with unsafe_allow_html on the line below
+st.markdown(f'<div class="preset-label">Try example {"repos" if mode == "Codebase" else "websites"}:</div>', unsafe_allow_html=True)
 
 badge_cols = st.columns(5)
 for idx, item in enumerate(presets):
