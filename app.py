@@ -12,7 +12,7 @@ except ImportError:
 # ==============================================================================
 # 1. VISUAL DNA: EXACT FRONTEND REPLICATION (CLEAN INTERFACE)
 # ==============================================================================
-st.set_page_config(page_title="GitReverse - Reverse into a prompt", page_icon="🔄", layout="centered")
+st.set_page_config(page_title="Code-Reverse - Reverse into a prompt", page_icon="🔄", layout="centered")
 
 st.markdown("""
     <style>
@@ -111,8 +111,6 @@ st.markdown("""
     <div class="brand-navigation">
         <div class="brand-title">GitReverse</div>
         <div class="brand-links">
-            <a href="#">Library</a>
-            <a href="#">Sign in</a>
         </div>
     </div>
 """, unsafe_allow_html=True)
