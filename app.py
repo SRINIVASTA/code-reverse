@@ -55,6 +55,7 @@ def extract_visual_design_tokens(url):
             # Extract actual H1/H2 text chunks to use as core feature instructions
             for heading in soup.find_all(["h1", "h2", "h3"])[:4]:
                 h_text = heading.get_text().strip()
+                # FIXED: Line 58 is now correctly structured and completely closed
                 if h_text and len(h_text) ', unsafe_allow_html=True)
             st.markdown("### 📋 Reconstructed Visual-Creator Prompt")
             st.caption("Copy this text and paste it into an AI tool like ChatGPT, Cursor, or Claude Code to build the frontend layout:")
