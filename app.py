@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import urllib.parse
 
 # ==============================================================================
-# 1. VISUAL DNA: EXACT FRONTEND REPLICATION
+# 1. VISUAL DNA: EXACT FRONTEND REPLICATION (CLEAN INTERFACE)
 # ==============================================================================
 st.set_page_config(page_title="GitReverse - Reverse into a prompt", page_icon="🔄", layout="centered")
 
@@ -25,8 +25,6 @@ st.markdown("""
     
     /* Result Windows */
     .prompt-container-box { background-color: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; padding: 20px; margin-top: 25px; }
-    .footer-container { text-align: center; font-size: 13px; color: #656d76; margin-top: 80px; padding-top: 20px; border-top: 1px solid #d0d7de; }
-    .footer-container a { color: #24292f; text-decoration: none; font-weight: 500; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -35,7 +33,7 @@ PRESET_REPOS = ["Next.js", "Openclaw", "React", "Supabase", "Linux"]
 PRESET_SITES = ["YouTube", "Pinterest", "Xbox", "Apple", "Discord"]
 
 # ==============================================================================
-# 2. LLM ENGINE & DATA EXTRACTION UTILITIES (FIXED API LINK STRINGS)
+# 2. LLM ENGINE & DATA EXTRACTION UTILITIES (ARRAY PARSING INDEX FIXED)
 # ==============================================================================
 def call_gemini_ai(scanned_context):
     """
@@ -46,11 +44,7 @@ def call_gemini_ai(scanned_context):
     if not api_key:
         return "⚠️ Please enter your free Gemini API Key in the sidebar to generate custom live prompts!"
         
-    # FIXED: Ensured URL formatting cleanly splits query parameters from the host domain path string
-    url = "https://googleapis.com"
-    
-    # Pass the API token securely inside params query string arrays safely
-    params = {"key": api_key}
+    url = f"https://googleapis.com{api_key}"
     headers = {"Content-Type": "application/json"}
     
     payload = {
@@ -68,21 +62,25 @@ def call_gemini_ai(scanned_context):
         }]
     }
     try:
-        res = requests.post(url, json=payload, params=params, headers=headers, timeout=15)
+        res = requests.post(url, json=payload, headers=headers, timeout=15)
+        
+        # Check if the connection itself failed
+        if res.status_code != 200:
+            return f"⚠️ Google Gateway rejected request (Status Code {res.status_code}). Verify your API Key."
+            
         response_json = res.json()
         
-        # Check if the API returned an explicit security or token validation error
-        if "error" in response_json:
-            return f"Google Gemini API Error: {response_json['error'].get('message', str(response_json['error']))}"
-            
-        # Safely extract text fields out of nested Gemini API objects
-        if "candidates" in response_json and response_json["candidates"]:
-            candidate = response_json["candidates"][0]
-            if "content" in candidate and "parts" in candidate["content"]:
-                if len(candidate["content"]["parts"]) > 0:
-                    return candidate["content"]["parts"][0].get("text", "No generated text string layout detected.")
+        # FIXED: Navigating candidates and parts as lists [0] instead of standard strings
+        if "candidates" in response_json and isinstance(response_json["candidates"], list) and len(response_json["candidates"]) > 0:
+            first_candidate = response_json["candidates"][0]
+            if "content" in first_candidate and "parts" in first_candidate["content"]:
+                parts_list = first_candidate["content"]["parts"]
+                if isinstance(parts_list, list) and len(parts_list) > 0:
+                    return parts_list[0].get("text", "No generated text string layout detected.")
                     
         return f"Unexpected API Response Structure: {str(response_json)}"
+    except ValueError:
+        return "⚠️ Failed to parse response as JSON. The API Key might be invalid or restricted."
     except Exception as e:
         return f"API Processing Error: {str(e)}"
 
@@ -177,4 +175,3 @@ if st.session_state.prompt_output:
     st.markdown("### 📋 Reconstructed System Prompt")
     st.code(st.session_state.prompt_output, language="markdown")
     st.markdown('</div>', unsafe_allow_html=True)
-
