@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import urllib.parse
 
 # ==============================================================================
-# 1. VISUAL DNA: EXACT GITREVERSE FRONTEND REPLICATION (TYPO FIXED)
+# 1. VISUAL DNA: EXACT GITREVERSE FRONTEND REPLICATION
 # ==============================================================================
 st.set_page_config(page_title="GitReverse - Reverse into a prompt", page_icon="🔄", layout="centered")
 
@@ -28,7 +28,7 @@ st.markdown("""
     .footer-container { text-align: center; font-size: 13px; color: #656d76; margin-top: 80px; padding-top: 20px; border-top: 1px solid #d0d7de; }
     .footer-container a { color: #24292f; text-decoration: none; font-weight: 500; }
     </style>
-""", unsafe_allow_html=True) # <-- FIXED HERE (Changed allowed to allow)
+""", unsafe_allow_html=True) # <-- TYPO FIXED HERE
 
 # Predefined fallback options for the layout badges
 PRESET_REPOS = ["Next.js", "Openclaw", "React", "Supabase", "Linux"]
@@ -57,7 +57,7 @@ def call_gemini_ai(scanned_context):
     }
     try:
         res = requests.post(url, json=payload, headers=headers, timeout=10)
-        return res.json()["candidates"][0]["content"]["parts"][0]["text"]
+        return res.json()["candidates"]["content"]["parts"][0]["text"]
     except Exception as e:
         return f"API Processing Error: {str(e)}"
 
@@ -88,6 +88,10 @@ st.sidebar.markdown("### 🔑 API Key Configuration")
 st.sidebar.markdown("GitReverse uses an LLM to generate custom prompts. You can get a free, no-cost key in 30 seconds at [Google AI Studio](https://google.com).")
 st.sidebar.text_input("Enter Gemini API Key:", type="password", key="api_key_input")
 
+if st.sidebar.button("Clear Application Logs", use_container_width=True):
+    st.session_state.prompt_output = None
+    st.rerun()
+
 # Top Navigation Strip
 st.markdown("""
     <div class="brand-navigation">
@@ -97,10 +101,10 @@ st.markdown("""
             <a href="#">Sign in</a>
         </div>
     </div>
-""", unsafe_allowed_html=True)
+""", unsafe_allow_html=True) # <-- TYPO FIXED HERE
 
-st.markdown('<div class="main-tagline">Reverse into a prompt</div>', unsafe_allowed_html=True)
-st.markdown('<div class="main-sub">Reverse engineer any codebase or website into a prompt.</div>', unsafe_allowed_html=True)
+st.markdown('<div class="main-tagline">Reverse into a prompt</div>', unsafe_allowed_html=False)
+st.markdown('<div class="main-sub">Reverse engineer any codebase or website into a prompt.</div>', unsafe_allowed_html=False)
 
 if "prompt_output" not in st.session_state:
     st.session_state.prompt_output = None
@@ -109,13 +113,13 @@ if "prompt_output" not in st.session_state:
 mode = st.radio("Toggle Mode", ["Codebase", "Website"], horizontal=True, label_visibility="collapsed")
 
 # Main Text Form Search Field
-placeholder = "https://github.com" if mode == "Codebase" else "https://www.youtube.com"
+placeholder = "https://github.com" if mode == "Codebase" else "https://youtube.com"
 url_bar_input = st.text_input("Input Target", placeholder=placeholder, label_visibility="collapsed")
 
 if st.button("Get Prompt", type="primary", use_container_width=True):
     if url_bar_input.strip():
         with st.spinner("Analyzing repository deployment configurations and invoking AI compiler..."):
-            context_data, error = extract_live_web_metadata = extract_live_github_data(url_bar_input)
+            context_data, error = extract_live_github_data(url_bar_input)
             if error:
                 st.error(f"Scraping Error: {error}")
             else:
@@ -124,15 +128,14 @@ if st.button("Get Prompt", type="primary", use_container_width=True):
         st.warning("Please enter a valid target link address first.")
 
 # Quick-Click Presets Selection Badges
-st.markdown("<br>", unsafe_allowed_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 presets = PRESET_REPOS if mode == "Codebase" else PRESET_SITES
-st.markdown(f'<div class="preset-label">Try example {"repos" if mode == "Codebase" else "websites"}:</div>', unsafe_allowed_html=True)
+st.markdown(f'<div class="preset-label">Try example {"repos" if mode == "Codebase" else "websites"}:</div>', unsafe_allow_html=True)
 
 badge_cols = st.columns(5)
 for idx, item in enumerate(presets):
     with badge_cols[idx]:
         if st.button(item, key=f"badge_{item}", use_container_width=True):
-            # Simulated search query link for the quick badges
             mock_url = f"https://github.com{item}" if mode == "Codebase" else f"https://www.{item.lower()}.com"
             with st.spinner(f"Processing preset template for {item}..."):
                 context_data, _ = extract_live_github_data(mock_url)
@@ -143,9 +146,14 @@ for idx, item in enumerate(presets):
 # 4. FINAL RENDER OUTPUT CANVAS
 # ==============================================================================
 if st.session_state.prompt_output:
-    st.markdown('<div class="prompt-container-box">', unsafe_allowed_html=True)
+    st.markdown('<div class="prompt-container-box">', unsafe_allow_html=True)
     st.markdown("### 📋 Reconstructed System Prompt")
     st.code(st.session_state.prompt_output, language="markdown")
-    st.markdown('</div>', unsafe_allowed_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown('<div class="footer-container">Also works: replace hub with reverse in any GitHub URL.<br><br>Made by <a href="#">Filiksyos</a> Replica Blueprint</div>', unsafe_allowed_html=True)
+st.markdown("""
+<div class="footer-container">
+    Also works: replace hub with reverse in any GitHub URL.<br><br>
+    Made by <a href="#">Filiksyos</a> Replica Blueprint
+</div>
+""", unsafe_allow_html=True) # <-- TYPO FIXED HERE
