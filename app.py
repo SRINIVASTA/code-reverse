@@ -33,7 +33,7 @@ PRESET_REPOS = ["Next.js", "Openclaw", "React", "Supabase", "Linux"]
 PRESET_SITES = ["YouTube", "Pinterest", "Xbox", "Apple", "Discord"]
 
 # ==============================================================================
-# 2. LLM ENGINE & DATA EXTRACTION UTILITIES (FIXED 404 ROUTE PATH)
+# 2. LLM ENGINE & DATA EXTRACTION UTILITIES (FIXED EXPLICIT CONCATENATION)
 # ==============================================================================
 def call_gemini_ai(scanned_context):
     """
@@ -44,10 +44,8 @@ def call_gemini_ai(scanned_context):
     if not api_key:
         return "⚠️ Please enter your free Gemini API Key in the sidebar to generate custom live prompts!"
         
-    # FIXED: Updated route to the current public production namespace to prevent 404 errors
-    url = "https://googleapis.com"
-    
-    query_params = {"key": api_key}
+    # FIXED: Combined the API key parameters using strict string concatenation to bypass 404 router issues
+    url = f"https://googleapis.com{api_key}"
     headers = {"Content-Type": "application/json"}
     
     payload = {
@@ -65,20 +63,20 @@ def call_gemini_ai(scanned_context):
         }]
     }
     try:
-        res = requests.post(url, json=payload, params=query_params, headers=headers, timeout=15)
+        res = requests.post(url, json=payload, headers=headers, timeout=15)
         
         if res.status_code != 200:
             return f"⚠️ Google Gateway rejected request (Status Code {res.status_code}). Server Message: {res.text}"
             
         response_json = res.json()
         
-        # Safely pull the generated text from Gemini's JSON structure
+        # Pull text components cleanly by drilling into candidate lists natively
         if "candidates" in response_json and response_json["candidates"]:
-            first_candidate = response_json["candidates"][0]
-            if "content" in first_candidate and "parts" in first_candidate["content"]:
-                parts_list = first_candidate["content"]["parts"]
-                if len(parts_list) > 0 and "text" in parts_list[0]:
-                    return parts_list[0]["text"]
+            candidates = response_json["candidates"]
+            if len(candidates) > 0 and "content" in candidates[0]:
+                content = candidates[0]["content"]
+                if "parts" in content and len(content["parts"]) > 0:
+                    return content["parts"][0].get("text", "No generated text found.")
                     
         return f"Unexpected API Response Structure: {str(response_json)}"
     except ValueError:
