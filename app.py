@@ -35,7 +35,7 @@ PRESET_REPOS = ["Next.js", "Openclaw", "React", "Supabase", "Linux"]
 PRESET_SITES = ["YouTube", "Pinterest", "Xbox", "Apple", "Discord"]
 
 # ==============================================================================
-# 2. LLM ENGINE & DATA EXTRACTION UTILITIES
+# 2. LLM ENGINE & DATA EXTRACTION UTILITIES (FIXED API LINK STRINGS)
 # ==============================================================================
 def call_gemini_ai(scanned_context):
     """
@@ -46,8 +46,13 @@ def call_gemini_ai(scanned_context):
     if not api_key:
         return "⚠️ Please enter your free Gemini API Key in the sidebar to generate custom live prompts!"
         
-    url = f"https://googleapis.com{api_key}"
+    # FIXED: Ensured URL formatting cleanly splits query parameters from the host domain path string
+    url = "https://googleapis.com"
+    
+    # Pass the API token securely inside params query string arrays safely
+    params = {"key": api_key}
     headers = {"Content-Type": "application/json"}
+    
     payload = {
         "contents": [{
             "parts": [{
@@ -63,15 +68,19 @@ def call_gemini_ai(scanned_context):
         }]
     }
     try:
-        res = requests.post(url, json=payload, headers=headers, timeout=12)
+        res = requests.post(url, json=payload, params=params, headers=headers, timeout=15)
         response_json = res.json()
         
-        # Safely extract generated text chunks out of the nested Gemini JSON architecture
+        # Check if the API returned an explicit security or token validation error
+        if "error" in response_json:
+            return f"Google Gemini API Error: {response_json['error'].get('message', str(response_json['error']))}"
+            
+        # Safely extract text fields out of nested Gemini API objects
         if "candidates" in response_json and response_json["candidates"]:
             candidate = response_json["candidates"][0]
             if "content" in candidate and "parts" in candidate["content"]:
                 if len(candidate["content"]["parts"]) > 0:
-                    return candidate["content"]["parts"][0].get("text", "No text found in API response parts.")
+                    return candidate["content"]["parts"][0].get("text", "No generated text string layout detected.")
                     
         return f"Unexpected API Response Structure: {str(response_json)}"
     except Exception as e:
@@ -148,8 +157,6 @@ if st.button("Get Prompt", type="primary", use_container_width=True):
 # Quick-Click Presets Selection Badges
 st.markdown("<br>", unsafe_allow_html=True)
 presets = PRESET_REPOS if mode == "Codebase" else PRESET_SITES
-
-# FIXED: Replaced unsafe_allowed_html with unsafe_allow_html on the line below
 st.markdown(f'<div class="preset-label">Try example {"repos" if mode == "Codebase" else "websites"}:</div>', unsafe_allow_html=True)
 
 badge_cols = st.columns(5)
