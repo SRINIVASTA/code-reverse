@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import urllib.parse
 
 # ==============================================================================
-# 1. VISUAL DNA: EXACT GITREVERSE FRONTEND REPLICATION
+# 1. VISUAL DNA: EXACT GITREVERSE FRONTEND REPLICATION (TYPO FIXED)
 # ==============================================================================
 st.set_page_config(page_title="GitReverse - Reverse into a prompt", page_icon="🔄", layout="centered")
 
@@ -28,7 +28,7 @@ st.markdown("""
     .footer-container { text-align: center; font-size: 13px; color: #656d76; margin-top: 80px; padding-top: 20px; border-top: 1px solid #d0d7de; }
     .footer-container a { color: #24292f; text-decoration: none; font-weight: 500; }
     </style>
-""", unsafe_allowed_html=True)
+""", unsafe_allow_html=True) # <-- FIXED HERE (Changed allowed to allow)
 
 # Predefined fallback options for the layout badges
 PRESET_REPOS = ["Next.js", "Openclaw", "React", "Supabase", "Linux"]
