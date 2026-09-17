@@ -55,7 +55,7 @@ def call_gemini_ai(scanned_context):
         client = genai.Client(api_key=api_key)
         
         prompt_instruction = (
-            "You are the backend engine of GitReverse. Take this raw scraped website text data "
+            "You are the backend engine of Code-Reverse. Take this raw scraped website text data "
             "and reverse-engineer it into a single, conversational user prompt. The prompt must "
             "be written in natural language, describing exactly how to build this specific project "
             "from scratch. Do not write folder diagrams or markdown structures. Write the exact "
@@ -99,7 +99,7 @@ def extract_live_github_data(url):
 # ==============================================================================
 # Sidebar API Configuration Panel
 st.sidebar.markdown("### 🔑 API Key Configuration")
-st.sidebar.markdown("GitReverse uses an LLM to generate custom prompts. You can get a free, no-cost key in 30 seconds at [Google AI Studio](https://google.com).")
+st.sidebar.markdown("Code-Reverse uses an LLM to generate custom prompts. You can get a free, no-cost key in 30 seconds at [Google AI Studio](https://google.com).")
 st.sidebar.text_input("Enter Gemini API Key:", type="password", key="api_key_input")
 
 if st.sidebar.button("Clear Application Logs", use_container_width=True):
@@ -109,7 +109,7 @@ if st.sidebar.button("Clear Application Logs", use_container_width=True):
 # Top Navigation Strip
 st.markdown("""
     <div class="brand-navigation">
-        <div class="brand-title">GitReverse</div>
+        <div class="brand-title">Code-Reverse</div>
         <div class="brand-links">
         </div>
     </div>
