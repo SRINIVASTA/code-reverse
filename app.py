@@ -153,9 +153,3 @@ if st.session_state.prompt_output:
     st.code(st.session_state.prompt_output, language="markdown")
     st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown("""
-<div class="footer-container">
-    Also works: replace hub with reverse in any GitHub URL.<br><br>
-    Made by <a href="#">Filiksyos</a> Replica Blueprint
-</div>
-""", unsafe_allow_html=True) # Fixed
